@@ -1,6 +1,16 @@
+
+# SDE density tracking
+
 The implementation consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
 Starting from a generic SDE
-<p align="center"><img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/1c7a588e294f11bde8e5682252de9d78.svg?invert_in_darkmode" align=middle width=442.0053pt height=16.376943pt/></p>
-with some time-independent drift and volatility functions <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/07617f9d8fe48b4a7b3f523d6730eef0.svg?invert_in_darkmode" align=middle width=9.867990000000004pt height=14.102549999999994pt/> and <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/8cda31ed38c6d59d14ebefa440099572.svg?invert_in_darkmode" align=middle width=9.945705000000002pt height=14.102549999999994pt/>, and initial position <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/07478cd102054dc58a97f6fd8df84705.svg?invert_in_darkmode" align=middle width=20.09601pt height=22.381919999999983pt/>, 
-the class calculates the probability density <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/b50be690bdc7c588960c687bce1768e7.svg?invert_in_darkmode" align=middle width=43.540035pt height=24.56552999999997pt/>, to be at position <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.359955000000003pt height=14.102549999999994pt/> at time <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/4f4f4e395762a3af4575de74c019ebb5.svg?invert_in_darkmode" align=middle width=5.9139630000000025pt height=20.14650000000001pt/>. 
-The class can furthermore deal with absorbing or reflective boundary conditions.
+$$
+dX_t = \mu(X_t)~ dt + \sigma(X_t) ~dW_t
+$$
+with some time-independent drift and volatility functions $\mu$ and $\sigma$, and initial position $X_0$, 
+the class calculates the probability density $p(x,t)$, to be at position $x$ at time $t$. 
+The class can furthermore deal with absorbing or reflective boundary conditions. 
+
+Technically, we are not solving the Fokker-Planck equation, but the Chapman-Kolmogorov forward equation. 
+This implementation has the additional advantage that the range of $x$-values is dynamic (no previous grid must be specified), and $\mu$ and $\sigma$ must not necessarily be differentiable. 
+
+See description.pdf and documentation inside SDE_DensityTracking.py for details. 
