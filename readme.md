@@ -1,8 +1,8 @@
 
-# SDE density tracking
+# SDE Density Tracking
 
 The implementation consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
-Starting from a generic SDE, with some time-independent drift and volatility functions, the class calculates the probability density to be at 
+Starting from a generic SDE, with some time-independent drift and volatility function, the class calculates the probability to be at 
 a certain position at a given time. The class can furthermore deal with absorbing or reflective boundary conditions. 
 
 Technically, we are not solving the Fokker-Planck equation, but the Chapman-Kolmogorov forward equation. 
