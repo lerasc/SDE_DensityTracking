@@ -25,9 +25,10 @@
 
 %%% bibliography settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[numbers]{natbib}
-\bibliographystyle{plainnat}
-
+\usepackage{natbib}
+\bibliographystyle{humannat}
+\setcitestyle{authoryear}
+\setlength{\bibsep}{1pt}
 
 % makros:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,17 +47,31 @@
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Theoretical Background} 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-The package consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
-We have followed the approach of \cite{Bhat2016}, which is straight forward. 
+The implementation consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
 Starting from a generic SDE
 \begin{equation}
 	\dd X_t = \mu(X_t)~ \dd t + \sigma(X_t) ~\dd W_t
 	\label{eq:SDE_generic}
 \end{equation}
-with some time-independent drift and volatility  functions $\mu$ and $\sigma$.
+with some time-independent drift and volatility functions $\mu$ and $\sigma$, and initial position $X_0$, 
+the class calculates the probability density $p(x,t)$, to be at position $x$ at time $t$. 
+The class can furthermore deal with absorbing or reflective boundary conditions. 
+
+
+\section{Input \& Output} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Upon initialization of the class with appropriate arguments, 
+one starts tracking the evolution of the density by calling the \texttt{track\_density} method. 
+Once finished, the density $p = p(x,t)$ can be retrieved by calling the \texttt{get\_density} method. 
+The return value can be either a functional or discretized object, and it can be either a function of $x$, of $t$, or both. 
+See documentation inside \texttt{SDE\_DensityTracking.py} for a detailed description of all input and output values. 
+
+
+\section{Theoretical Background} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In our implementation, we have followed the approach of \cite{Bhat2016}, which is straight forward. 
 We first discretize \eqref{eq:SDE_generic} in time, giving
 \begin{equation}
 	X_{t+1} = X_t +  \mu(X_t) \Delta t + \sigma(X_t) \sqrt{ \Delta t} Z_t
@@ -79,7 +94,7 @@ Discretizing \eqref{eq:CK} yields
 where $k$ is the spatial discretization step, ie. $k = y_{i+1}-y_i ~ \forall i$. 
 For the numerical implementation, the infinite sum in \eqref{eq:CK_discrete} is truncated naturally by just summing over all values $y_i$ calculated at time $t$. 
 The considered value range $x_i$ at time $t+1$ is determined dynamically at runtime as the minimum and maximum value below and above
-which the density is less than some pre-specified precision value, that we can safely approximate as zero. 
+which the density is less than some pre-specified precision value \texttt{tol}, that we can safely approximate as zero. 
 \footnote{
 In principle, this implementation can cause some problem in case of a a bimodal initial distribution with two unconnected peaks, 
 i.e. with regions of zero probability mass between the two peaks. 
@@ -87,23 +102,27 @@ Because this is a very specific case, we ignore it for here for simplicity.
 } 
 This new range of values at time $t+1$ naturally truncates the summation in \eqref{eq:CK_discrete} in the next iteration, and so on. 
 If there is an absorbing boundary, we must just replace the Gaussian $G(x,y)$ in \eqref{eq:CK_discrete} by 
-\begin{equation}
-	p(s, t ~ ; ~s_0, \underline{s}=0) = \frac{1}{\sqrt{2 \pi \sigma^2 t}} 
+\begin{align}
+	p(s, t ~ ; ~s_0, \underline{s}=0) = \frac{1}{\sqrt{2 \pi \sigma^2 t}} &
  							\left[
- 							 \exp \left( - \frac{ ( s_0 + \mu t - s )^2 }{2 \sigma^2 t}   \right) 
- 							 - \exp \left( - \frac{2 s_0 \mu}{\sigma^2} \right) 
+ 							 \exp \left( - \frac{ ( s_0 + \mu t - s )^2 }{2 \sigma^2 t}   \right) \right.  \notag \\
+							 &~~~~							 
+ 							\left.  - \exp \left( - \frac{2 s_0 \mu}{\sigma^2} \right) 
 							 \exp \left(- \frac{  ( s_0 - \mu t + s )^2 }{2 \sigma^2 t} \right) 							 
  							 \right],
 							 \label{eq:p_absorbing_explicit}
-\end{equation} 
+\end{align} 
 which is the density of a random walk with drift $\mu$ and volatility $\sigma$, in presence of an absorbing boundary at $s = 0$. 
 A formula similar to equation \eqref{eq:p_absorbing_explicit} exists for the reflective barrier. 
 See for  instance \cite{Molini2011} for a derivation of these results. 
 
+Note that technically, we are not solving the Fokker-Planck equation, but the Chapman-Kolmogorov forward equation. 
+This implementation has the additional advantage that the range of $x$-values is dynamic (no previous grid must be specified), 
+and $\mu$ and $\sigma$ must not necessarily be differentiable. 
 
-\section{Implementation details} 
+
+\section{Consistency check} 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 We have checked the validity of the implementation in figure \ref{fig:PDE_solution}. 
 \begin{figure}[!htb]
@@ -115,9 +134,14 @@ We have checked the validity of the implementation in figure \ref{fig:PDE_soluti
 			in excellent agreement with the numerical one.}
 	\label{fig:PDE_solution}
 \end{figure}
-Note that technically, we are not solving the Fokker-Planck equation, but the Chapman-Kolmogorov forward equation. 
-This implementation has the additional advantage that the range of $x$-values is dynamic (no previous grid must be specified), 
-and $\mu$ and $\sigma$ must not necessarily be differentiable. 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\bibliography{bibliography.bib}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 

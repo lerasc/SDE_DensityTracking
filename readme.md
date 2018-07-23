@@ -1,36 +1,42 @@
+The implementation consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
+Starting from a generic SDE
+<html>
+<head>
+<title>LaTeX4Web 1.4 OUTPUT</title>
+<style type="text/css">
+<!--
+ body {color: black;  background:"#FFCC99";  }
+ div.p { margin-top: 7pt;}
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.norm {line-height:normal;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td.sqrt {border-top:2 solid black;
+          border-left:2 solid black;
+          border-bottom:none;
+          border-right:none;}
+ table.sqrt {border-top:2 solid black;
+             border-left:2 solid black;
+             border-bottom:none;
+             border-right:none;}
+-->
+</style>
+</head>
+<body>
 
-This class provides a numerical solution of the Chapman-Kolmogorov equation / Fokker-Planck equation 
-Consider a stochastic differential equation of the form
-$$
-\mathrm{d}X_t   = \mu(X_t) \mathrm{d}t + \sigma(X_t) \mathrm{d}W_t, ~~   X_0 = x0   
-$$       
-where $\mu$ and $\sigma$ are two functions of $X$, and $x0$ is some initial value. 
-In this class, we calculate numerically the probability $p(x,t)$ of being at position $x$ at time $t$. 
-Instead of solving the Fokker-Planck equation associated
-with the above equation we use a method called density tracking by quadrature (DTQ) [1], which first disretizes 
-the equation in time as
-$$
-X_{i+1} = X_i + mu(X_t) h + sigma(X_i) sqrt(h) Z_{i+1},
-$$
-with $h$ the discretization time-step, and $Z_{i+1}$ a Gaussian random variable with zero mean and unit variance.
-We can see immediately that the position of $X_{i+1}$ is distributed according to a Gaussian 
-with mean $X_i +  \mu(X_i) h$ and standard deviation $\sigma(X_i) \sqrt{ h}$. 
-Let us denote by $G(x,y)$ a Gaussian with mean $y+\mu(y) h$ and standard deviation $\sigma(y) \sqrt{h}$. 
-Then, the density at position $x$ at time $t+1$ is just given by the Chapman-Kolmogorov equation, which, 
-in discretized form, reads
-$$
-p(x, t_{i+1}) = k sum_{j=-M}^M G(x, y_j) p(y_j, t_i). 
-$$
-Here, $k$ is the spatial discretization width and $M$ is some finite size cut-off. 
-Details are found in the documentation of SDE_DensityTracking.py, and in [1]. 
-A similar implementation exists for R [2].
+<table cellspacing=0  border=0 align=center>
+<tr>
+  <td nowrap align="center">
+    
+	\dd X<sub>t</sub> = <font face=symbol>m</font>(X<sub>t</sub>)&nbsp; \dd t + <font face=symbol>s</font>(X<sub>t</sub>) &nbsp;\dd W<sub>t</sub>
+<a name="eq0">&nbsp;&nbsp;&nbsp;&nbsp;<font color=blue>(0)</font>
+  </td>
+</tr>
+</table>
+</body>
+</html>
+with some time-independent drift and volatility functions $\mu$ and $\sigma$, and initial position $X_0$, 
+the class calculates the probability density $p(x,t)$, to be at position $x$ at time $t$. 
+The class can furthermore deal with absorbing or reflective boundary conditions.
 
-references:
-----------
-[1] Bhat, H.S., and Madushani, R.W.M.A, "Density tracking by quadrature for stochastic differential equations."
-    arXiv preprint arXiv:1610.09572 (2016). <br>
-[2] Rdtq: Density Tracking by Quadrature (https://cran.r-project.org/web/packages/Rdtq/index.html) <br>
-[3] Veestraeten, D. "The conditional probability density function for a reflected Brownian motion."
-    Computational Economics 24.2 (2004): 185-207. <br>
-[4] Molini, A., et al. "First passage time statistics of Brownian motion with purely time dependent drift and
-    diffusion." Physica A: Statistical Mechanics and its Applications 390.11 (2011): 1841-1852.      
+See description.pdf and documentation inside SDE_DensityTracking.py for details. 

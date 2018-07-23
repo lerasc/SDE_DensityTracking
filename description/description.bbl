@@ -1,8 +1,19 @@
-\begin{thebibliography}{0}
+\begin{thebibliography}{2}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bhat and Madushani(2016)]{Bhat2016}
+H.~S. Bhat and R.~W. M.~A. Madushani.
+\newblock Density tracking by quadrature for stochastic differential equations.
+\newblock \emph{arXiv preprint arXiv:1610.09572}, 2016.
+
+\bibitem[Molini et~al.(2011)Molini, Talkner, Katul, and Porporato]{Molini2011}
+A.~Molini, P.~Talkner, G.~Katul, and A.~Porporato.
+\newblock {First passage time statistics of Brownian motion with purely time
+  dependent drift and diffusion}.
+\newblock \emph{Physica A}, 390\penalty0 (11):\penalty0 1841--1852, 2011.
 
 \end{thebibliography}

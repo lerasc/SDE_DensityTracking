@@ -25,6 +25,7 @@ class SDE_DensityTracking:
     where k is the spatial discretization width, G(x,y) is the density of being at position x at time i+1 when at
     position y at time t, and M is some finite size cut-off.
     See description.pdf and [1] for details. A similar implementation exists for R [2].
+    Submit questions at sandrolera@gmail.com
 
     input:
     -----
