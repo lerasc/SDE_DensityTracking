@@ -1,42 +1,6 @@
 The implementation consists of one single class that tracks the density distribution of the solution to a stochastic differential equation (SDE). 
 Starting from a generic SDE
-<html>
-<head>
-<title>LaTeX4Web 1.4 OUTPUT</title>
-<style type="text/css">
-<!--
- body {color: black;  background:"#FFCC99";  }
- div.p { margin-top: 7pt;}
- td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
- td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
- td div.norm {line-height:normal;}
- td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
- td.sqrt {border-top:2 solid black;
-          border-left:2 solid black;
-          border-bottom:none;
-          border-right:none;}
- table.sqrt {border-top:2 solid black;
-             border-left:2 solid black;
-             border-bottom:none;
-             border-right:none;}
--->
-</style>
-</head>
-<body>
-
-<table cellspacing=0  border=0 align=center>
-<tr>
-  <td nowrap align="center">
-    
-	\dd X<sub>t</sub> = <font face=symbol>m</font>(X<sub>t</sub>)&nbsp; \dd t + <font face=symbol>s</font>(X<sub>t</sub>) &nbsp;\dd W<sub>t</sub>
-<a name="eq0">&nbsp;&nbsp;&nbsp;&nbsp;<font color=blue>(0)</font>
-  </td>
-</tr>
-</table>
-</body>
-</html>
-with some time-independent drift and volatility functions $\mu$ and $\sigma$, and initial position $X_0$, 
-the class calculates the probability density $p(x,t)$, to be at position $x$ at time $t$. 
+<p align="center"><img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/1c7a588e294f11bde8e5682252de9d78.svg?invert_in_darkmode" align=middle width=442.0053pt height=16.376943pt/></p>
+with some time-independent drift and volatility functions <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/07617f9d8fe48b4a7b3f523d6730eef0.svg?invert_in_darkmode" align=middle width=9.867990000000004pt height=14.102549999999994pt/> and <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/8cda31ed38c6d59d14ebefa440099572.svg?invert_in_darkmode" align=middle width=9.945705000000002pt height=14.102549999999994pt/>, and initial position <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/07478cd102054dc58a97f6fd8df84705.svg?invert_in_darkmode" align=middle width=20.09601pt height=22.381919999999983pt/>, 
+the class calculates the probability density <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/b50be690bdc7c588960c687bce1768e7.svg?invert_in_darkmode" align=middle width=43.540035pt height=24.56552999999997pt/>, to be at position <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.359955000000003pt height=14.102549999999994pt/> at time <img src="https://rawgit.com/slera90/SDE_DensityTracking/master/svgs/4f4f4e395762a3af4575de74c019ebb5.svg?invert_in_darkmode" align=middle width=5.9139630000000025pt height=20.14650000000001pt/>. 
 The class can furthermore deal with absorbing or reflective boundary conditions.
-
-See description.pdf and documentation inside SDE_DensityTracking.py for details. 
