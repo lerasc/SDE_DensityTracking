@@ -9,6 +9,7 @@ from inspect            import signature
 from numpy 	            import sqrt, exp, pi
 from scipy.interpolate  import interp1d, interp2d
 
+
 class SDE_DensityTracking:
     """
     Consider a stochastic differential equation of the form
@@ -22,8 +23,8 @@ class SDE_DensityTracking:
     Then,  we apply the discretized Chapman-Kolmogorov equation to get
         p(x, t_{i+1}) = k sum_{j=-M}^M G(x, y_j) p(y_j, t_i) 														(3)
     where k is the spatial discretization width, G(x,y) is the density of being at position x at time i+1 when at
-    position y at time t, and M is some finite size cut-off. Details are found in [1] and a similar implementation
-    exists for R [2].
+    position y at time t, and M is some finite size cut-off.
+    See description.pdf and [1] for details. A similar implementation exists for R [2].
 
     input:
     -----
