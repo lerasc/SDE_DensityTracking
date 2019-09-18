@@ -13,12 +13,12 @@ from scipy.interpolate  import interp1d, interp2d
 class SDE_DensityTracking:
     """
     Consider a stochastic differential equation of the form
-        dX_t 	= mu(X_t) dt + sigma(X_t) dW_t,    X_0 = x0 														(1)
-    where mu and sigma are two functions of X, and x0 is some initial value. In this class, we calculate numerically
-    the probability p(x,t) of being at position x at time t. Instead of solving the Fokker-Planck equation associated
-    with equation (1), we use a method called density tracking by quadrature (DTQ) [1], which first disretizes (1) in
-    time as
-        X_{i+1} = X_i + mu(X_t) h + sigma(X_i) sqrt(h) Z_{i+1},														(2)
+        dX_t 	= mu(X_t, t) dt + sigma(X_t, t) dW_t,    X_0 = x0 													(1)
+    where mu and sigma are two functions of X and time t, and x0 is some initial value. In this class, we calculate
+    numerically the probability p(x,t) of being at position x at time t. Instead of solving the Fokker-Planck equation
+    associated with equation (1), we use a method called density tracking by quadrature (DTQ) [1], which first
+    disretizes (1) in time as
+        X_{i+1} = X_i + mu(X_t,t) h + sigma(X_i,t) sqrt(h) Z_{i+1},												    (2)
     with h the discretization time-step, and Z_{i+1} a Gaussian random variable with zero mean and unit variance.
     Then,  we apply the discretized Chapman-Kolmogorov equation to get
         p(x, t_{i+1}) = k sum_{j=-M}^M G(x, y_j) p(y_j, t_i) 														(3)
@@ -29,9 +29,10 @@ class SDE_DensityTracking:
 
     input:
     -----
-    mu:			Drift function in equation (1), must be function of one variable.
+    mu:			Drift function in equation (1), must be function of one variable (X) or two variables (X and t).
+                First argument (location X) must always be present. Second argument (time t) is optional.
 
-    sigma:		Volatility function in equation (2), must be function of one variable.
+    sigma:		Same as mu, but the volatility function in equation (1).
 
     x0:         Special initial condition where p0 is a Dirac delta located at x=x0. Either p0 or x0 must be provided, 
                 but not both.     
@@ -98,10 +99,12 @@ class SDE_DensityTracking:
         # check that provided input is correct
         ################################################################################################################
         assert( callable(mu) ),"mu must be function"
-        assert( len(signature(mu).parameters)==1 ),"mu must be function of one variable"
+        no_mu_args  =  len(signature(mu).parameters) # number of arguments the mu function takes
+        assert( no_mu_args in [1,2] ),"mu must be function of one or two variables"
 
         assert( callable(sigma) ),"sigma must be function"
-        assert( len(signature(sigma).parameters)==1 ),"sigma must be function of one variable"
+        no_sig_args =  len(signature(sigma).parameters) # number of arguments the sigma function takes
+        assert( no_sig_args in [1,2] ),"sigma must be function of one or two variables"
 
         if p0 is not None:
             assert(len(p0)==3),"p0 must be a tripple of values"
@@ -131,13 +134,21 @@ class SDE_DensityTracking:
         assert(isinstance(T,Number)),"T must be a number"
         assert(isinstance(h,Number)),"h must be a number"    
         assert(isinstance(k,Number)),"k must be a number"    
-        assert(isinstance(tol,Number)),"tol must be a number"  
+        assert(isinstance(tol,Number)),"tol must be a number"
+
+        # if mu/sigma was provided with only on variable, add additional t-dependence argument for internal consistency
+        ################################################################################################################
+        if no_mu_args==1:  mu_func = lambda x,t: mu(x)
+        else:              mu_func = lambda x,t: mu(x,t)
+
+        if no_sig_args==1: sig_func = lambda x,t: sigma(x)
+        else:              sig_func = lambda x,t: sigma(x,t)
 
 
         # define class atributes
         ################################################################################################################
-        self._mu 		    = mu
-        self._sigma 	    = sigma
+        self._mu 		    = mu_func
+        self._sigma 	    = sig_func
         self._p0		    = p0
         self._x0 		    = x0
         self._x_ 		    = x_
@@ -155,16 +166,16 @@ class SDE_DensityTracking:
     ####################################################################################################################
     ### private methods
     ####################################################################################################################
-    def _G(self,x,y):
+    def _G(self,x,y,t):
         """
-        Transition density of being at position x at time i+1 when at position y at time t.
+        Transition density of being at position x at time t+1 when at position y at time t.
         See e.g. [4] for a derivation of the density with absorbing and reflective barrier.
         """
 
         if self._boundary is None: 							# free transition density, equation (4) in [1]
 
-            sqt 	= 2 * self._sigma(y)**2 * self._h
-            p 		= exp(- (x-y-self._mu(y)*self._h)**2 / sqt )
+            sqt 	= 2 * self._sigma(y,t)**2 * self._h
+            p 		= exp(- (x-y-self._mu(y,t)*self._h)**2 / sqt )
             p 	   /= sqrt( pi * sqt )
             return p
 
@@ -175,10 +186,10 @@ class SDE_DensityTracking:
 
             y 	   -= self._x_								# rescale such that absorbing boundary is at y=0
             x 	   -= self._x_								# rescale such that absorbing boundary is at y=0
-            sqt 	= 2 * self._sigma(y)**2 * self._h
-            dr 		= self._mu(y) * self._h
+            sqt 	= 2 * self._sigma(y,t)**2 * self._h
+            dr 		= self._mu(y,t) * self._h
             p1  	= exp( -( y+dr-x )**2 / sqt )
-            p2	    = exp( - 2*y*self._mu(y) / self._sigma(y)**2 )
+            p2	    = exp( - 2*y*self._mu(y) / self._sigma(y,t)**2 )
             p2     *= exp( -( y-dr+x )**2 / sqt )
             p       = (p1-p2) / sqrt( pi *sqt )
             return p
@@ -188,21 +199,23 @@ class SDE_DensityTracking:
             raise NotImplementedError("Not yet implemented, but easy to do so.")
 
 
-    def _CK(self, x, ys, ps, efficient=False):
+    def _CK(self, x, ys, t, ps, efficient=False):
         """
         Chapman-Kolmogorov step.
         Given a value x at which we want to calculate the density for the next time-step, integrate over all ys at the
         current time-step to obtain that value, using equation (7) in [1], with a natural truncation resulting from
         the finiteness of ys. The array ps stores the probabilities of the ys. If efficient is set to True, the
         convolution is not extended over all y values, but only the y-values that are within a range of 4 standard
-        deviations from x, since G(x,y) is a Gaussian and hence strongly localized.
+        deviations from x, since G(x,y,t) is a Gaussian and hence strongly localized.
         """
         if not efficient:
-            return self._k * sum( np.array([self._G(x,y) for y in ys]) * ps )       # integrate over all y values
+
+            return self._k * sum( np.array([self._G(x,y,t) for y in ys]) * ps )       # integrate over all y values
+
         else: 
-            std             = self._sigma(x) * np.sqrt(self._h)                     # one standard deviation
-            intv            = pd.Interval( x-4*std, x+4*std )                       # outside this interval: approx. 0
-            summands        = [ self._G(x,y)*p for y,p in zip(ys,ps) if y in intv ] # restricted integration range
+            std             = self._sigma(x,t) * np.sqrt(self._h)                     # one standard deviation
+            intv            = pd.Interval( x-4*std, x+4*std )                         # outside this interval: approx. 0
+            summands        = [ self._G(x,y,t)*p for y,p in zip(ys,ps) if y in intv ] # restricted integration range
             return            self._k * sum(summands)                              
 
 
@@ -268,10 +281,10 @@ class SDE_DensityTracking:
         with a standard devation equal to k/10.
         """
 
+        sig  = 0.1* self._k
         def sharp_Gaussian(x): return np.exp(-0.5 * ((x-self._x0)/sig)**2) / (np.sqrt(2*np.pi) * 0.5 )
 
-        sig  = 0.1* self._k
-        return sharp_Gaussian(x)
+        return sharp_Gaussian
 
 
     def _i(self,x):
@@ -342,14 +355,14 @@ class SDE_DensityTracking:
             x_vals_below 	= []
             p_vals_below    = []
             new_x 			= x_start
-            new_p 			= self._CK(new_x, prev_x_vals, prev_p_vals)
+            new_p 			= self._CK(new_x, prev_x_vals, t, prev_p_vals)
 
             while new_p > self._tol:
 
                 x_vals_below += [new_x]
                 p_vals_below += [new_p]
                 new_x         = self._nx( new_x - self._k )                     # move one step down and calculate...
-                new_p 		  = self._CK(new_x, prev_x_vals, prev_p_vals)       # ... probability to reach there
+                new_p 		  = self._CK(new_x, prev_x_vals, t, prev_p_vals)    # ... probability to reach there
                 new_p         = max(0,new_p)                                    # to avoid numerical errors
 
 
@@ -358,14 +371,14 @@ class SDE_DensityTracking:
             x_vals_above	= []
             p_vals_above    = []
             new_x 			= self._nx( x_start + self._k )                     # move one step up and calculate...
-            new_p 			= self._CK(new_x, prev_x_vals, prev_p_vals)         # ... probability to reach there
+            new_p 			= self._CK(new_x, prev_x_vals, t, prev_p_vals)      # ... probability to reach there
 
             while new_p > self._tol:
 
                 x_vals_above += [new_x]
                 p_vals_above += [new_p]
                 new_x         = self._nx( new_x + self._k )                     # move one step up and calculate...
-                new_p 		  = self._CK(new_x, prev_x_vals, prev_p_vals)       # ... probability to reach there
+                new_p 		  = self._CK(new_x, prev_x_vals, t, prev_p_vals)    # ... probability to reach there
                 new_p         = max(0,new_p)                                    # to avoid numerical errors
 
             # merge the new values above and below x_min(i-1) into one new list and append it to the slices
