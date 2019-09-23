@@ -189,7 +189,7 @@ class SDE_DensityTracking:
             sqt 	= 2 * self._sigma(y,t)**2 * self._h
             dr 		= self._mu(y,t) * self._h
             p1  	= exp( -( y+dr-x )**2 / sqt )
-            p2	    = exp( - 2*y*self._mu(y) / self._sigma(y,t)**2 )
+            p2	    = exp( - 2*y*self._mu(y,t) / self._sigma(y,t)**2 )
             p2     *= exp( -( y-dr+x )**2 / sqt )
             p       = (p1-p2) / sqrt( pi *sqt )
             return p
