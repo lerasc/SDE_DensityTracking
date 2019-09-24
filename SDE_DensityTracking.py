@@ -159,7 +159,6 @@ class SDE_DensityTracking:
         self._tol 		    = tol
         self._ts  		    = np.arange(0,T+h,h) 	        # discrete times considered, incl. 0 and T.
         self._ns    	    = len(self._ts)			        # number of time slices
-        self._tslices	    = np.arange(1,self._ns)	        # iteration of time slices
         self._calculated    = False					        # set two True once 'track_density' has been called
 
 
@@ -325,11 +324,11 @@ class SDE_DensityTracking:
         self._ps 		= []	# stores lists of p(x)=p(x,t) for different t values.
         self._initialize()		# calculate i=0
 
-        for i, t in enumerate(self._tslices): # for i=1,...,T do:
+        for i, t in enumerate( self._ts[1:], start=1 ): # for i=1,...,T do:
 
             # print the progress
             ############################################################################################################            
-            percentage = 100 * (i+1) / len(self._tslices)
+            percentage = 100 * (i+1) / len(self._ts)
             if print_status: print("Simulation running, %.1f%% done."%percentage, end="\r")
 
             # extract x-values from previous time slice
