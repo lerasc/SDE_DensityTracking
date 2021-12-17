@@ -347,7 +347,7 @@ class SDE_DensityTracking:
             ############################################################################################################
             prev_max        = np.array(prev_p_vals).argmax()    # index of previous maximum of bimodality
             x_start         = prev_x_vals[prev_max]             # where we start this iteration from            
-                       # jump to next time-step
+            
 
             # we start from x_start, and move downwards in steps of k until x_min(i) is reached
             ############################################################################################################
